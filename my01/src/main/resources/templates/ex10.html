@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Chat</title>
     <style>
       body {
         font-family: sans-serif;
@@ -19,18 +19,16 @@
         flex-direction: column;
         align-items: center;
         margin: 100px auto;
-        /* border: 1px solid black; */
         border-radius: 15px;
         overflow: hidden;
-        box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.404);
+        box-shadow: 10px 10px 20px rgba(0, 0, 0, 0.4);
       }
+
       .chat-container {
         width: 100%;
         box-sizing: border-box;
-        /* transform: translateY(50%); */
-        /* height: 500px; */
         background-color: white;
-        padding: 1rem 3rem 0 4rem;
+        padding: 1rem 2rem 0 2rem;
         border-radius: 15px 15px 0 0;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
         display: flex;
@@ -58,6 +56,7 @@
         color: rgb(73, 66, 141);
         font-weight: bold;
       }
+
       button {
         width: 30%;
         font-weight: bold;
@@ -71,35 +70,43 @@
       .message {
         display: flex;
         margin-bottom: 1.2rem;
-        align-items: end;
+        align-items: flex-start;
       }
 
       .message.bot {
-        justify-content: start;
+        justify-content: flex-start;
       }
 
       .message.user {
-        justify-content: end;
+        justify-content: flex-end;
       }
 
-      .bubble {
-        max-width: 220px;
-        position: relative;
-        background-color: #e0dfdf;
-        padding: 0.7rem 2rem;
-        border-radius: 20px;
-        word-break: break-word;
-        white-space: pre-line;
+      .message-content {
+        display: flex;
+        align-items: center;
+        gap: 10px;
       }
 
       .name {
         font-size: 0.8rem;
         color: #555;
-        margin: 0 10px 2px;
+      }
+
+      .bubble {
+        max-width: 220px;
+        background-color: #e0dfdf;
+        padding: 0.7rem 1.2rem;
+        border-radius: 20px;
+        word-break: break-word;
+        white-space: pre-line;
       }
 
       .user .bubble {
         background-color: yellow;
+      }
+
+      .user .message-content {
+        flex-direction: row-reverse;
       }
 
       .user .name {
@@ -108,7 +115,7 @@
 
       .chat-container::-webkit-scrollbar {
         background: #e0dfdf;
-        width: 30px;
+        width: 10px;
       }
 
       .chat-container::-webkit-scrollbar-thumb {
@@ -120,67 +127,94 @@
         background: #95bb0d;
         border-radius: 6px;
       }
+
+      .profile {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-size: cover;
+        background-position: center;
+      }
+
+      .user-img {
+        background-image: url("https://cdn-icons-png.flaticon.com/128/4139/4139981.png");
+      }
+
+      .bot-img {
+        background-image: url("https://cdn-icons-png.flaticon.com/128/10479/10479785.png");
+      }
     </style>
   </head>
-
   <body>
-    <!-- div.chat-container>div.message.bot>div>div.name{myBot}+div.bubble{안녕하세요. 무엇을 도와드릴까요?}^^div.message.user>div>div.name{나}+div.bubble{Flex로 채팅화면을 만들수 있냐?} -->
-
     <div class="box">
-      <div class="chat-container">
-      <div class="message bot">
-        <div>
-          <div class="name">myBot</div>
-          <div class="bubble">안녕하세요. 무엇을 도와드릴까요? ㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋㅋ</div>
+      <div class="chat-container" id="chat-container">
+        <div class="message bot">
+          <div class="message-content">
+            <div class="profile bot-img" title="myBot"></div>
+            <div>
+              <div class="name"></div>
+              <div class="bubble">안녕하세요. 무엇을 도와드릴까요?</div>
+            </div>
+          </div>
         </div>
+      </div>
+
+      <div class="chat-input">
+        <textarea id="text-area" placeholder="메세지를 입력하세요."></textarea>
+        <button id="send-btn">전송</button>
       </div>
     </div>
 
-    <div class="chat-input">
-      <textarea name="" id="text-area" placeholder="메세지를 입력하세요."></textarea>
-      <button id="send-btn">전송</button>
-    </div>
-    
     <script>
       const sendBtn = document.getElementById("send-btn");
-      const chatContainer = document.querySelector(".chat-container");
-      const textarea = document.querySelector("#text-area");
+      const chatContainer = document.getElementById("chat-container");
+      const textarea = document.getElementById("text-area");
 
       const sendMessage = () => {
-        const userMessage = textarea.value.trim(); // 빈칸 없애기
-        if (userMessage) {
-          const userDiv = document.createElement("div");
-          userDiv.className = "message user";
-          userDiv.innerHTML = `<div><div class="name">나</div><div class="bubble">${userMessage}</div></div></div>`;
-          chatContainer.appendChild(userDiv);
-          textarea.value = ""; // 전송하고 입력창 비우기
-          chatContainer.scrollTop = chatContainer.scrollHeight; // 스크롤을 맨아래로 이동
-        }
+        const userMessage = textarea.value.trim();
+        if (!userMessage) return;
 
-        fetch("/final_chatbot",{
+        const userDiv = document.createElement("div");
+        userDiv.className = "message user";
+        userDiv.innerHTML = `
+          <div class="message-content">
+            <div class="profile user-img" title="나"></div>
+            <div>
+              <div class="name"></div>
+              <div class="bubble">${userMessage}</div>
+            </div>
+          </div>`;
+        chatContainer.appendChild(userDiv);
+        textarea.value = "";
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+
+        fetch("/final_chatbot", {
           method: "POST",
-          headers: { "content-Type":"application/json" },
-          body: JSON.stringify({ message:userMessage }),
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMessage }),
         })
-          .then(res => res.json())
-          .then(data => {
-            console.log(data);
+          .then((res) => res.json())
+          .then((data) => {
             const botDiv = document.createElement("div");
             botDiv.className = "message bot";
-            botDiv.innerHTML = `<div><div class="name">myBot</div><div class="bubble">${data.reply}</div></div>`;
+            botDiv.innerHTML = `
+              <div class="message-content">
+                <div class="profile bot-img" title="myBot"></div>
+                <div>
+                  <div class="name"></div>
+                  <div class="bubble">${data.reply}</div>
+                </div>
+              </div>`;
             chatContainer.appendChild(botDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight; // 스크롤을 맨아래로 이동
-        });
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+          });
       };
 
-      /* 전송버튼클릭 */
       sendBtn.addEventListener("click", sendMessage);
-
-      /* 엔터로 전송 */
       textarea.addEventListener("keydown", (event) => {
-        if (event.key === "Enter" && !event.ShiftKey) {
-          event.preventDefault(); // 한칸내리는 기능 방지
-          sendMessage(); //메시지 전송
+        if (event.key === "Enter" && !event.shiftKey) {
+          event.preventDefault();
+          sendMessage();
         }
       });
     </script>
